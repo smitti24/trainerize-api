@@ -21,6 +21,7 @@
       "noImplicitReturns": true,
       "noFallthroughCasesInSwitch": true,
       "experimentalDecorators": true,
+      "strictPropertyInitialization": false,
       "emitDecoratorMetadata": true
     },
     "include": ["src/**/*"],
