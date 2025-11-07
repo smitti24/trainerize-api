@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import { ErrorResponse } from '../types/api'
 
 export class ErrorMiddleware {
@@ -6,7 +6,6 @@ export class ErrorMiddleware {
         error: Error,
         req: Request,
         res: Response,
-        next: NextFunction
     ): void {
         const errorResponse: ErrorResponse = {
             error: error.name || 'InternalServerError',
