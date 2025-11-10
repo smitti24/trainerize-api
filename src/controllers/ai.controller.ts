@@ -40,4 +40,22 @@ export class AiController {
             next(error)
         }
     }
+
+    public async generateLesson(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { content } = req.body
+
+            if (!content) {
+                res.status(400).json({ error: 'Please provide a content in the request body' })
+                return
+            }
+
+            const result = await this.aiService.generateLesson(content)
+
+            res.status(200).json(result)
+        }
+        catch (error) {
+            next(error)
+        }
+    }
 }
