@@ -9,7 +9,7 @@ export class AiService {
 
     constructor() {
         this.genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY)
-        this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
+        this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     }
 
     async testGeneration(prompt: string): Promise<{ success: boolean, prompt: string, response: string, themes: Theme[], timestamp: string }> {
