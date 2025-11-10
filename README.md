@@ -2,7 +2,10 @@
 
 ## Endpoints:
 **Health**: https://trainer-api-gilt.vercel.app/api/v1/health 
+
 **Ingestions Health Check**: https://trainer-api-gilt.vercel.app/api/v1/ingestions/health 
+
+**AI Health Check**: https://trainer-api-gilt.vercel.app//api/v1/ai/health
 
 ## Planning
 
@@ -73,6 +76,7 @@ The free tier lets me experiment freely without worrying about API costs piling 
 **Description**: Asks the AI "Can you tell me why CatalyzeU South Africa is the best at what they do?" and extracts 3-7 themes from the response.
 
 **Response Structure**:
+```
 {
   "success": true,
   "prompt": "Can you tell me why CatalyzeU South Africa is the best at what they do?",
@@ -87,17 +91,21 @@ The free tier lets me experiment freely without worrying about API costs piling 
   ],
   "timestamp": "2024-11-10T12:00:00.000Z"
 }
+```
 
 #### `POST /api/v1/ai/generate-lesson`
 **Purpose**: Generate workplace learning lesson from content  
 **Description**: Takes raw text content and generates a structured, workplace-focused lesson (250-400 words) designed for employee upskilling.
 
 **Request Body**:
+```
 {
   "content": "Your learning material text here..."
 }
+```
 
 **Response Structure**:
+```
 {
   "success": true,
   "lesson": {
@@ -120,6 +128,7 @@ The free tier lets me experiment freely without worrying about API costs piling 
   },
   "timestamp": "2024-11-10T12:00:00.000Z"
 }
+```
 
 **Features**:
 - 250-400 word lessons optimized for workplace learning
