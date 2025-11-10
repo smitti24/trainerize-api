@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
+    "debug": "nodemon --inspect src/server.ts",
     "build": "tsc",
     "vercel-build": "echo 'No build step needed'",
     "build:watch": "tsc --watch",
@@ -33,6 +34,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.80.0",
     "@vercel/node": "^5.5.4",
     "cors": "^2.8.5",

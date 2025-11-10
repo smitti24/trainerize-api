@@ -13,6 +13,7 @@ async function startServer(): Promise<void> {
             console.log(`Trainerize API running on port ${env.PORT}`)
             console.log(`API available at http://localhost:${env.PORT}${env.API_PREFIX}`)
             console.log(`Health check: http://localhost:${env.PORT}${env.API_PREFIX}/health`)
+            console.log(`AI Test endpoint: http://localhost:${env.PORT}${env.API_PREFIX}/ai-test/health`)
         })
 
         process.on('SIGTERM', async () => {
