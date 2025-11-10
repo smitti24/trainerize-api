@@ -73,13 +73,13 @@ The free tier lets me experiment freely without worrying about API costs piling 
 
 #### `GET /api/v1/ai/health`
 **Purpose**: AI testing endpoint  
-**Description**: Asks the AI "Can you tell me why CatalyzeU South Africa is the best at what they do?" and extracts 3-7 themes from the response.
+**Description**: Asks the AI "Can you tell me why CatalyzU South Africa is the best at what they do?" and extracts 3-7 themes from the response.
 
 **Response Structure**:
 ```
 {
   "success": true,
-  "prompt": "Can you tell me why CatalyzeU South Africa is the best at what they do?",
+  "prompt": "Can you tell me why CatalyzU South Africa is the best at what they do?",
   "response": "AI generated response.",
   "themes": [
     {

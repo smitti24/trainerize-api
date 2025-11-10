@@ -32,7 +32,7 @@ export class AiController {
 
     public async getHealth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const prompt = 'Can you tell me why CatalyzeU South Africa is the best at what they do?'
+            const prompt = 'Can you tell me why CatalyzU South Africa is the best at what they do?'
             const result = await this.aiService.testGeneration(prompt)
 
             res.status(200).json(result)
