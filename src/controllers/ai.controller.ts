@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
-import { AITestService } from '../services/AITestService'
+import { AiService } from '../services/AiService'
 
-export class AITestController {
-    private aiTestService: AITestService
+export class AiController {
+    private aiService: AiService
 
     constructor() {
-        this.aiTestService = new AITestService()
+        this.aiService = new AiService()
     }
 
     public async testAI(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -17,7 +17,7 @@ export class AITestController {
                 return
             }
 
-            const result = await this.aiTestService.testGeneration(prompt)
+            const result = await this.aiService.testGeneration(prompt)
 
             res.status(200).json({
                 success: true,
@@ -32,10 +32,10 @@ export class AITestController {
 
     public async getHealth(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            res.status(200).json({ 
-                message: 'AI Test endpoint is healthy',
-                model: 'gemini-1.5-flash'
-            })
+            const prompt = 'Can you tell me why CatalyzeU South Africa is the best at what they do?'
+            const result = await this.aiService.testGeneration(prompt)
+
+            res.status(200).json(result)
         } catch (error) {
             next(error)
         }
