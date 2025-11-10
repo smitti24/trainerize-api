@@ -6,5 +6,6 @@ const controller = new AiController()
 
 router.get('/health', (req, res, next) => controller.getHealth(req, res, next))
 router.post('/', (req, res, next) => controller.testAI(req, res, next))
+router.post('/generate-lesson', (req, res, next) => controller.generateLesson(req, res, next))
 
 export { router as aiRoutes }

@@ -2,6 +2,7 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai'
 import { env } from '../config/environment'
 import { Theme } from '../entities/Theme.entity'
 import { AI_PROMPTS, fillPromptTemplate } from '../config/prompts/prompts'
+import { Lesson } from '../entities/Lesson.entity'
 
 export class AiService {
     private genAI: GoogleGenerativeAI
@@ -69,6 +70,32 @@ export class AiService {
         } catch (error) {
             console.error('Theme extraction error:', error)
             throw new Error('Failed to extract themes from content')
+        }
+    }
+
+    async generateLesson(prompt: string): Promise<{ success: boolean, lesson: Partial<Lesson>, timestamp: string }> {
+        try {
+            const result = await this.model.generateContent(
+                fillPromptTemplate(AI_PROMPTS.GENERATE_LESSON, { content: prompt })
+            )
+
+            let text = result.response.text()
+
+            text = text.replace(/\n?/gi, '').replace(/```/g, '').trim()
+            const jsonMatch = text.match(/\{[\s\S]*\}/)
+            if (jsonMatch) text = jsonMatch[0]
+
+            const lessonData: Partial<Lesson> = JSON.parse(text)
+
+            return {
+                success: true,
+                lesson: lessonData,
+                timestamp: new Date().toISOString()
+            }
+        }
+        catch (error) {
+            console.error('AI Error:', error)
+            throw new Error('Failed to generate lesson')
         }
     }
 }
