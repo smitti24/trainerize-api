@@ -63,3 +63,67 @@ OpenAi requires a card subscription up front while gemini allows me to have 1500
 The free tier lets me experiment freely without worrying about API costs piling up. If this project scales beyond the free limits, I can always upgrade or switch to OpenAI later. But for now, Gemini gives me everything I need without the overhead.
 
 **Current model:** `gemini-2.5-flash`
+
+#### Available Endpoints
+
+### AI Endpoints
+
+#### `GET /api/v1/ai/health`
+**Purpose**: AI testing endpoint  
+**Description**: Asks the AI "Can you tell me why CatalyzeU South Africa is the best at what they do?" and extracts 3-7 themes from the response.
+
+**Response Structure**:
+{
+  "success": true,
+  "prompt": "Can you tell me why CatalyzeU South Africa is the best at what they do?",
+  "response": "AI generated response.",
+  "themes": [
+    {
+      "title": "Theme Title",
+      "description": "Theme description",
+      "orderIndex": 1,
+      "confidenceScore": 0.95
+    }
+  ],
+  "timestamp": "2024-11-10T12:00:00.000Z"
+}
+
+#### `POST /api/v1/ai/generate-lesson`
+**Purpose**: Generate workplace learning lesson from content  
+**Description**: Takes raw text content and generates a structured, workplace-focused lesson (250-400 words) designed for employee upskilling.
+
+**Request Body**:
+{
+  "content": "Your learning material text here..."
+}
+
+**Response Structure**:
+{
+  "success": true,
+  "lesson": {
+    "whatYoullLearn": "Opening section explaining key takeaways...",
+    "keyConcepts": [
+      {
+        "title": "Concept Title",
+        "content": "Detailed explanation..."
+      }
+    ],
+    "applyAtWork": "Specific actionable steps for workplace application...",
+    "keyTakeaways": [
+      "First key takeaway",
+      "Second key takeaway",
+      "Third key takeaway"
+    ],
+    "wordCount": 320,
+    "tone": "professional",
+    "targetAudience": "employees upskilling for work"
+  },
+  "timestamp": "2024-11-10T12:00:00.000Z"
+}
+
+**Features**:
+- 250-400 word lessons optimized for workplace learning
+- Professional "for work" tone
+- Structured sections: What You'll Learn, Key Concepts, Apply at Work, Key Takeaways
+- 2-3 detailed key concepts with practical explanations
+- Actionable steps employees can implement immediately
