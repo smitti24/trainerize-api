@@ -2,6 +2,7 @@
 
 ## Endpoints:
 **Health**: https://trainer-api-gilt.vercel.app/api/v1/health 
+**Ingestions Health Check**: https://trainer-api-gilt.vercel.app/api/v1/ingestions/health 
 
 ## Planning
 
