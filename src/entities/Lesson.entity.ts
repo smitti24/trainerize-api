@@ -22,22 +22,22 @@ export class Lesson {
     @Column({ type: 'text' })
     content: string
 
-    @Column({ name: 'word_count' })
+    @Column({ type: 'int', name: 'word_count' })
     wordCount: number
 
-    @Column({ length: 50, default: 'professional' })
+    @Column({ type: 'varchar', length: 50, default: 'professional' })
     tone: string
 
-    @Column({ length: 1000, nullable: true, name: 'audio_url' })
+    @Column({ type: 'varchar', length: 1000, nullable: true, name: 'audio_url' })
     audioUrl: string | null
 
-    @Column({ nullable: true, name: 'audio_duration' })
+    @Column({ type: 'int', nullable: true, name: 'audio_duration' })
     audioDuration: number | null
 
     @Column({ type: 'timestamp', nullable: true, name: 'audio_generated_at' })
     audioGeneratedAt: Date | null
 
-    @Column({ length: 100, default: 'employee upskilling', name: 'target_audience' })
+    @Column({ type: 'varchar', length: 100, default: 'employee upskilling', name: 'target_audience' })
     targetAudience: string
 
     @OneToOne(() => Ingestion, (ingestion) => ingestion.lesson, { onDelete: 'CASCADE' })

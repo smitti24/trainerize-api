@@ -24,13 +24,13 @@ export class SourceCitation {
     @Column({ type: 'text' })
     snippet: string
 
-    @Column({ nullable: true, name: 'page_number' })
+    @Column({ type: 'int', nullable: true, name: 'page_number' })
     pageNumber: number | null
 
-    @Column({ nullable: true, name: 'line_number' })
+    @Column({ type: 'int', nullable: true, name: 'line_number' })
     lineNumber: number | null
 
-    @Column({ nullable: true, name: 'paragraph_number' })
+    @Column({ type: 'int', nullable: true, name: 'paragraph_number' })
     paragraphNumber: number | null
 
     // Context
@@ -40,7 +40,7 @@ export class SourceCitation {
     @Column({ type: 'text', nullable: true, name: 'context_after' })
     contextAfter: string | null
 
-    @Column({ name: 'order_index' })
+    @Column({ type: 'int', name: 'order_index' })
     orderIndex: number
 
     @Column({ type: 'decimal', precision: 3, scale: 2, nullable: true, name: 'relevance_score' })
