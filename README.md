@@ -3,7 +3,6 @@
 ## Endpoints:
 **Health**: https://trainer-api-gilt.vercel.app/api/v1/health 
 
-
 ## Planning
 
 ### Database Schema
@@ -42,4 +41,14 @@
 6. **Real-time functionality** - Live updates for processing status
 7. **Good for audio storage** - Perfect for TTS audio files
 
-thisistrainerizeapidb
+#### API 
+
+##### Patterns:
+**Repository Pattern** TODO: (Fill in more details here)
+- The repository pattern allows us to conform to several Design Principles:
+
+1. Separation of Concerns
+2. Single Responsibility Principle
+3. Dependency Inversion Principle
+4. Open/Close Principle
+5. Interface Segregation Principle
