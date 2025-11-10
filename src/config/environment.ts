@@ -11,6 +11,7 @@ const envSchema = z.object({
     SUPABASE_URL: z.url(),
     SUPABASE_ANON_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
+    GEMINI_API_KEY: z.string(),
 })
 
 export const env = envSchema.parse(process.env)
