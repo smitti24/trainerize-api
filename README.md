@@ -53,3 +53,13 @@
 3. Dependency Inversion Principle
 4. Open/Close Principle
 5. Interface Segregation Principle
+
+#### AI Integration: **Google Gemini**
+
+**Why Gemini over OpenAI?**
+
+OpenAi requires a card subscription up front while gemini allows me to have 1500 requests per day. So for this MVP i feel that although openai is the more powerful and accurate model, to prove our concept, gemini serves the purpose well enough
+
+The free tier lets me experiment freely without worrying about API costs piling up. If this project scales beyond the free limits, I can always upgrade or switch to OpenAI later. But for now, Gemini gives me everything I need without the overhead.
+
+**Current model:** `gemini-2.5-flash`
