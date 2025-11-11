@@ -20,3 +20,13 @@ export const ingestionIdSchema = _uuidSchema
 export const ingestionSchema = createIngestionSchema.extend({
     id: ingestionIdSchema,
 })
+
+export const createAndProcessIngestionSchema = z.object({
+    title: z.string().min(1).max(500),
+    sourceType: z.enum(['pdf', 'txt', 'docx']),
+    fileSize: z.number().positive(),
+    filePath: z.string().max(1000).optional().nullable(),
+    originalFilename: z.string().min(1).max(500),
+    rawText: z.string().min(1)
+})
+

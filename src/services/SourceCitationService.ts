@@ -18,7 +18,8 @@ export class SourceCitationService {
 
     async createCitation(data: {
         lessonId: string
-        snippetText: string
+        ingestionId: string
+        snippet: string
         pageNumber: number | null
         lineNumber: number | null
         relevanceScore: number | null
@@ -29,8 +30,9 @@ export class SourceCitationService {
 
     async createCitationsBulk(
         lessonId: string,
+        ingestionId: string,
         citations: Array<{
-            snippetText: string
+            snippet: string
             pageNumber: number | null
             lineNumber: number | null
             relevanceScore: number | null
@@ -41,7 +43,8 @@ export class SourceCitationService {
         for (let i = 0; i < citations.length; i++) {
             const citation = await this.createCitation({
                 lessonId,
-                snippetText: citations[i].snippetText,
+                ingestionId,
+                snippet: citations[i].snippet,
                 pageNumber: citations[i].pageNumber,
                 lineNumber: citations[i].lineNumber,
                 relevanceScore: citations[i].relevanceScore,

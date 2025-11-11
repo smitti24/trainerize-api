@@ -36,4 +36,8 @@ router.delete('/:id', (req, res, next) =>
     ingestionController.deleteIngestion(req, res, next)
 )
 
+router.post('/process', (req, res, next) =>
+    ingestionController.processIngestion(req, res, next)
+)
+
 export { router as ingestionRoutes }

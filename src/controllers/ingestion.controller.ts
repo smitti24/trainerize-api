@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { IngestionService } from '../services/IngestionService'
 import { IngestionRepository } from '../repositories/IngestionRepository'
-import { createIngestionSchema, completeProcessingSchema, ingestionSchema, ingestionIdSchema } from '../schemas/ingestion.schema'
+import { createIngestionSchema, completeProcessingSchema, ingestionSchema, ingestionIdSchema, createAndProcessIngestionSchema } from '../schemas/ingestion.schema'
 import { Ingestion } from '../entities/Ingestion.entity'
+
 export class IngestionController {
     private ingestionService: IngestionService
 
@@ -122,4 +123,29 @@ export class IngestionController {
             next(error)
         }
     }
+
+    public async processIngestion(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validatedData = createAndProcessIngestionSchema.parse(req.body)
+            
+            const result = await this.ingestionService.createAndProcessIngestion({
+                title: validatedData.title,
+                sourceType: validatedData.sourceType,
+                fileSize: validatedData.fileSize,
+                filePath: validatedData.filePath || null,
+                originalFilename: validatedData.originalFilename,
+                rawText: validatedData.rawText
+            })
+    
+            res.status(201).json({
+                success: true,
+                message: 'Ingestion created and processed successfully',
+                data: result
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    
 }

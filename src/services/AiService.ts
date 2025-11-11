@@ -91,11 +91,6 @@ export class AiService {
             if (jsonMatch) text = jsonMatch[0]
 
             const lessonData: Partial<Lesson> = JSON.parse(text)
-            const themes = await this.extractThemes(prompt)
-            const citations = await this.extractCitations(prompt, JSON.stringify(lessonData))
-
-            console.log('Themes:', themes)
-            console.log('Citations:', citations)
 
             return {
                 success: true,
@@ -125,7 +120,7 @@ export class AiService {
                     temperature: 0.2,
                     topP: 0.9,
                     topK: 20,
-                    maxOutputTokens: 2048,
+                    maxOutputTokens: 8192,
                 },
             })
 

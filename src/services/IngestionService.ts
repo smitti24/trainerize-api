@@ -1,11 +1,28 @@
 import { IngestionRepository } from '../repositories/IngestionRepository'
 import { Ingestion } from '../entities/Ingestion.entity'
+import { AiService } from './AiService'
+import { ThemeService } from './ThemeService'
+import { LessonService } from './LessonService'
+import { SourceCitationService } from './SourceCitationService'
+import { SourceCitationRepository } from '../repositories/SourceCitationRepository'
+import { ThemeRepository } from '../repositories/ThemeRepository'
+import { LessonRepository } from '../repositories/LessonRepository'
+import { Lesson, SourceCitation, Theme } from '../entities'
+import { withRetry } from '../middleware/retry.middleware'
 
 export class IngestionService {
     private ingestionRepository: IngestionRepository
+    private aiService: AiService
+    private themeService: ThemeService
+    private lessonService: LessonService
+    private citationService: SourceCitationService
 
     constructor(ingestionRepository: IngestionRepository) {
         this.ingestionRepository = ingestionRepository
+        this.aiService = new AiService()
+        this.themeService = new ThemeService(new ThemeRepository())
+        this.lessonService = new LessonService(new LessonRepository())
+        this.citationService = new SourceCitationService(new SourceCitationRepository())
     }
 
     async getAllIngestions(): Promise<Ingestion[]> {
@@ -67,6 +84,116 @@ export class IngestionService {
 
     async deleteIngestion(id: string): Promise<boolean> {
         return await this.ingestionRepository.delete(id)
+    }
+
+    async createAndProcessIngestion(data: {
+        title: string
+        sourceType: 'pdf' | 'txt' | 'docx'
+        fileSize: number
+        filePath: string | null
+        originalFilename: string
+        rawText: string
+    }): Promise<{
+        ingestion: Ingestion
+        themes: Theme[]
+        lesson: Lesson
+        citations: SourceCitation[]
+    }> {
+        const ingestion = await this.createIngestion({
+            title: data.title,
+            sourceType: data.sourceType,
+            fileSize: data.fileSize,
+            filePath: data.filePath,
+            originalFilename: data.originalFilename
+        })
+
+        const wordCount = data.rawText.trim().split(/\s+/).length
+        await this.ingestionRepository.update(ingestion.id!, {
+            rawText: data.rawText,
+            wordCount
+        })
+
+        return await this.processIngestion(ingestion.id!, data.rawText)
+    }
+    
+    async processIngestion(id: string, rawText: string): Promise<{
+        ingestion: Ingestion
+        themes: Theme[]
+        lesson: Lesson
+        citations: SourceCitation[]
+    }> {
+        await this.ingestionRepository.update(id, {
+            status: 'processing',
+            processingStartedAt: new Date()
+        })
+    
+        try {
+            const themes = await this.handleThemes(id, rawText)
+            
+            const lesson = await this.generateLesson(id, rawText)
+    
+            const citations = await this.extractCitations(lesson.id, id, rawText, JSON.stringify(lesson))
+    
+            const ingestion = await this.ingestionRepository.update(id, {
+                status: 'completed',
+                processingCompletedAt: new Date()
+            })
+    
+            return {
+                ingestion: ingestion!,
+                themes,
+                lesson,
+                citations
+            }
+        } catch (error) {
+            await this.ingestionRepository.update(id, {
+                status: 'failed',
+                processingCompletedAt: new Date()
+            })
+            throw error
+        }
+    }
+
+    private async handleThemes(id: string, rawText: string): Promise<Theme[]> {
+        const themesData = await withRetry(() => this.aiService.extractThemes(rawText))
+
+        await this.themeService.createThemesBulk(id, themesData.map(theme => ({
+            title: theme.title,
+            description: theme.description,
+            confidenceScore: theme.confidenceScore
+        })))
+
+        return themesData
+    }
+
+    private async extractCitations(lessonId: string, ingestionId: string, rawText: string, lessonContent: string): Promise<SourceCitation[]> {
+        const citationsData = await withRetry(() => this.aiService.extractCitations(rawText, lessonContent))
+    
+        const citations = await this.citationService.createCitationsBulk(
+            lessonId,
+            ingestionId,
+            citationsData.map(citation => ({
+                snippet: citation.snippet || '',
+                pageNumber: citation.pageNumber || null,
+                lineNumber: citation.lineNumber || null,
+                relevanceScore: citation.relevanceScore || null
+            }))
+        )
+    
+        return citations
+    }
+
+    private async generateLesson(id: string, rawText: string): Promise<Lesson> {
+        const lessonResult = await withRetry(() => this.aiService.generateLesson(rawText))
+    
+        const lesson = await this.lessonService.createLesson({
+            ingestionId: id,
+            content: JSON.stringify(lessonResult.lesson),
+            tone: lessonResult.lesson.tone || 'professional',
+            targetAudience: lessonResult.lesson.targetAudience || 'employee upskilling'
+        })
+    
+        return lesson
     }
 
     private generateIngestionId(): string {

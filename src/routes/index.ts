@@ -6,7 +6,7 @@ import { aiRoutes } from './ai.routes'
 const router = Router()
 
 router.use(healthRoutes)
-router.use('/ingestions', ingestionRoutes)
+router.use('/ingestion', ingestionRoutes)
 router.use('/ai', aiRoutes)
 
 export { router as apiRoutes }

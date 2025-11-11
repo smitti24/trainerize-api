@@ -3,7 +3,30 @@ import { Request, Response, NextFunction } from 'express'
 const sleep = (ms: number): Promise<void> => 
     new Promise(resolve => setTimeout(resolve, ms))
 
-export function withRetry(
+export async function withRetry<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    delayMs: number = 1000
+): Promise<T> {
+    let lastError: Error | null = null
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn()
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error))
+            
+            if (attempt < maxRetries) {
+                console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${delayMs}ms`)
+                await sleep(delayMs)
+            }
+        }
+    }
+
+    throw lastError || new Error('Retry failed')
+}
+
+export function withRetryMiddleware(
     handler: (req: Request, res: Response, next: NextFunction) => Promise<void>,
     maxRetries: number = 3,
     delayMs: number = 1000
