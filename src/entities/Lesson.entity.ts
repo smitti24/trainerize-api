@@ -37,7 +37,7 @@ export class Lesson {
     @Column({ type: 'timestamp', nullable: true, name: 'audio_generated_at' })
     audioGeneratedAt: Date | null
 
-    @Column({ type: 'varchar', length: 100, default: 'employee upskilling', name: 'target_audience' })
+    @Column({ type: 'varchar', length: 500, default: 'employee upskilling', name: 'target_audience' })
     targetAudience: string
 
     @OneToOne(() => Ingestion, (ingestion) => ingestion.lesson, { onDelete: 'CASCADE' })

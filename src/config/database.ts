@@ -1,12 +1,13 @@
 import { DataSource } from 'typeorm'
 import { env } from './environment'
+import { Ingestion, Theme, Lesson, SourceCitation } from '../entities'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
     url: env.DATABASE_URL,
     synchronize: false,
     logging: env.NODE_ENV === 'development',
-    entities: ['src/entities/**/*.ts'],
+    entities: [Ingestion, Theme, Lesson, SourceCitation],
     migrations: ['src/migrations/**/*.ts'],
     ssl: {
         rejectUnauthorized: false,
