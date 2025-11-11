@@ -3,6 +3,7 @@ import { env } from '../config/environment'
 import { Theme } from '../entities/Theme.entity'
 import { AI_PROMPTS, fillPromptTemplate } from '../config/prompts/prompts'
 import { Lesson } from '../entities/Lesson.entity'
+import { SourceCitation } from '../entities/SourceCitation.entity'
 
 export class AiService {
     private genAI: GoogleGenerativeAI
@@ -45,17 +46,21 @@ export class AiService {
                     temperature: 0.1,        // Lower = more consistent
                     topP: 0.9,              // More focused
                     topK: 20,               // Limit token choices
-                    maxOutputTokens: 2048,
+                    maxOutputTokens: 8192,
                 },
             })
 
             let text = result.response.text().trim()
 
             text = text
-                .replace(/\n?/gi, '')
+                .replace(/```json\n?/gi, '')
                 .replace(/```\n?/g, '')
-                .replace(/^[\s\n]+|[\s\n]+$/g, '')
                 .trim()
+
+            if (!text.startsWith('[')) {
+                const jsonMatch = text.match(/\[[\s\S]*\]/)
+                if (jsonMatch) text = jsonMatch[0]
+            }
 
             console.log('Cleaned JSON:', text.substring(0, 200))
 
@@ -86,6 +91,11 @@ export class AiService {
             if (jsonMatch) text = jsonMatch[0]
 
             const lessonData: Partial<Lesson> = JSON.parse(text)
+            const themes = await this.extractThemes(prompt)
+            const citations = await this.extractCitations(prompt, JSON.stringify(lessonData))
+
+            console.log('Themes:', themes)
+            console.log('Citations:', citations)
 
             return {
                 success: true,
@@ -96,6 +106,54 @@ export class AiService {
         catch (error) {
             console.error('AI Error:', error)
             throw new Error('Failed to generate lesson')
+        }
+    }
+
+    async extractCitations(
+        sourceContent: string,
+        lessonContent: string
+    ): Promise<Array<Partial<SourceCitation>>> {
+        const prompt: string = fillPromptTemplate(AI_PROMPTS.EXTRACT_CITATIONS, {
+            content: sourceContent,
+            lesson: lessonContent
+        })
+
+        try {
+            const result = await this.model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.2,
+                    topP: 0.9,
+                    topK: 20,
+                    maxOutputTokens: 2048,
+                },
+            })
+
+            let text: string = result.response.text().trim()
+
+            text = text
+                .replace(/```json\n?/gi, '')
+                .replace(/```\n?/g, '')
+                .trim()
+
+            if (!text.startsWith('[')) {
+                const jsonMatch = text.match(/\[[\s\S]*\]/)
+                if (jsonMatch) text = jsonMatch[0]
+            }
+
+            console.log('Cleaned Citations JSON:', text.substring(0, 200))
+
+            const citations: Array<Partial<SourceCitation>> = JSON.parse(text)
+
+            if (!Array.isArray(citations) || citations.length < 2 || citations.length > 3) {
+                throw new Error('Invalid number of citations returned (expected 2-3)')
+            }
+
+            return citations
+
+        } catch (error) {
+            console.error('Citation extraction error:', error)
+            throw new Error('Failed to extract citations from content')
         }
     }
 }

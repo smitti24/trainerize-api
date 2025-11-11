@@ -64,6 +64,45 @@ Requirements:
 
 CRITICAL: Your response must be ONLY the JSON object. No markdown, no explanations, no extra text. Start with { and end with }`,
 
+EXTRACT_CITATIONS: `Extract the 2-3 most relevant and important snippets from the source content that best support the key concepts taught in the lesson. These citations serve as evidence/proof for what was taught.
+
+SOURCE CONTENT:
+{{content}}
+
+LESSON CONTEXT:
+{{lesson}}
+
+Return ONLY a valid JSON array of citations:
+[
+  {
+    "snippet": "The exact quote or passage from the source (30-150 words). MUST be complete sentences.",
+    "contextBefore": "A few words before the snippet for context (optional)",
+    "contextAfter": "A few words after the snippet for context (optional)",
+    "pageNumber": 1,
+    "paragraphNumber": 2,
+    "relevanceScore": 0.95
+  }
+]
+
+REQUIREMENTS:
+- Extract 2-3 citations (most important snippets only)
+- snippet: Direct quote from source material (30-150 WORDS - count them!)
+- Each snippet MUST be COMPLETE sentences with proper punctuation
+- DO NOT cut off mid-sentence
+- Include enough context to be meaningful and standalone
+- contextBefore/contextAfter: Optional surrounding context (10-20 words each)
+- pageNumber: Page number if available (null if not applicable)
+- paragraphNumber: Paragraph position in the document (estimate based on content location)
+- relevanceScore: How relevant this snippet is to the lesson (0.70 to 1.00)
+- Order by importance (most relevant first)
+
+EXAMPLE GOOD SNIPPET:
+"Modern leaders should also embrace diversity and inclusion, recognizing that diverse perspectives lead to better problem-solving and innovation. Studies have shown that teams with diverse backgrounds generate more creative solutions and adapt better to changing market conditions."
+
+EXAMPLE BAD SNIPPET (too short/incomplete):
+"Modern leaders should also embrace diversity and inclusion"
+
+CRITICAL: Your response must be ONLY the JSON array. No markdown, no explanations, no extra text. Start with [ and end with ]`,
 }
 
 export function fillPromptTemplate(template: string, variables: Record<string, string>): string {
