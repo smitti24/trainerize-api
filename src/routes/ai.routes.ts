@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { AiController } from '../controllers/ai.controller'
+import { withRetry } from '../middleware/retry.middleware'
 
 const router = Router()
 const controller = new AiController()
 
-router.get('/health', (req, res, next) => controller.getHealth(req, res, next))
-router.post('/', (req, res, next) => controller.testAI(req, res, next))
-router.post('/generate-lesson', (req, res, next) => controller.generateLesson(req, res, next))
+router.get('/health', withRetry((req, res) => controller.getHealth(req, res)))
+router.post('/', withRetry((req, res) => controller.testAI(req, res)))
+router.post('/generate-lesson', withRetry((req, res) => controller.generateLesson(req, res)))
 
 export { router as aiRoutes }
