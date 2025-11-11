@@ -25,7 +25,7 @@ export class Lesson {
     @Column({ type: 'int', name: 'word_count' })
     wordCount: number
 
-    @Column({ type: 'varchar', length: 50, default: 'professional' })
+    @Column({ type: 'varchar', length: 200, default: 'professional' })
     tone: string
 
     @Column({ type: 'varchar', length: 1000, nullable: true, name: 'audio_url' })
@@ -37,7 +37,7 @@ export class Lesson {
     @Column({ type: 'timestamp', nullable: true, name: 'audio_generated_at' })
     audioGeneratedAt: Date | null
 
-    @Column({ type: 'varchar', length: 500, default: 'employee upskilling', name: 'target_audience' })
+    @Column({ type: 'text', default: 'employee upskilling', name: 'target_audience' })
     targetAudience: string
 
     @OneToOne(() => Ingestion, (ingestion) => ingestion.lesson, { onDelete: 'CASCADE' })

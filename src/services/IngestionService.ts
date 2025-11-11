@@ -4,11 +4,13 @@ import { AiService } from './AiService'
 import { ThemeService } from './ThemeService'
 import { LessonService } from './LessonService'
 import { SourceCitationService } from './SourceCitationService'
+import { StorageService } from './StorageService'
 import { SourceCitationRepository } from '../repositories/SourceCitationRepository'
 import { ThemeRepository } from '../repositories/ThemeRepository'
 import { LessonRepository } from '../repositories/LessonRepository'
 import { Lesson, SourceCitation, Theme } from '../entities'
 import { withRetry } from '../middleware/retry.middleware'
+import { formatLessonForAudio, calculateAudioDuration, LessonContent } from '../utils/lessonFormatter'
 
 export class IngestionService {
     private ingestionRepository: IngestionRepository
@@ -16,6 +18,7 @@ export class IngestionService {
     private themeService: ThemeService
     private lessonService: LessonService
     private citationService: SourceCitationService
+    private storageService: StorageService
 
     constructor(ingestionRepository: IngestionRepository) {
         this.ingestionRepository = ingestionRepository
@@ -23,6 +26,7 @@ export class IngestionService {
         this.themeService = new ThemeService(new ThemeRepository())
         this.lessonService = new LessonService(new LessonRepository())
         this.citationService = new SourceCitationService(new SourceCitationRepository())
+        this.storageService = new StorageService()
     }
 
     async getAllIngestions(): Promise<Ingestion[]> {
@@ -41,7 +45,7 @@ export class IngestionService {
         originalFilename: string
     }): Promise<Ingestion> {
         const ingestionId: string = this.generateIngestionId()
-        
+
         const ingestionData: Partial<Ingestion> = {
             ingestionId,
             title: data.title,
@@ -115,7 +119,7 @@ export class IngestionService {
 
         return await this.processIngestion(ingestion.id!, data.rawText)
     }
-    
+
     async processIngestion(id: string, rawText: string): Promise<{
         ingestion: Ingestion
         themes: Theme[]
@@ -126,19 +130,19 @@ export class IngestionService {
             status: 'processing',
             processingStartedAt: new Date()
         })
-    
+
         try {
             const themes = await this.handleThemes(id, rawText)
-            
+
             const lesson = await this.generateLesson(id, rawText)
-    
+
             const citations = await this.extractCitations(lesson.id, id, rawText, JSON.stringify(lesson))
-    
+
             const ingestion = await this.ingestionRepository.update(id, {
                 status: 'completed',
                 processingCompletedAt: new Date()
             })
-    
+
             return {
                 ingestion: ingestion!,
                 themes,
@@ -168,7 +172,7 @@ export class IngestionService {
 
     private async extractCitations(lessonId: string, ingestionId: string, rawText: string, lessonContent: string): Promise<SourceCitation[]> {
         const citationsData = await withRetry(() => this.aiService.extractCitations(rawText, lessonContent))
-    
+
         const citations = await this.citationService.createCitationsBulk(
             lessonId,
             ingestionId,
@@ -179,20 +183,49 @@ export class IngestionService {
                 relevanceScore: citation.relevanceScore || null
             }))
         )
-    
+
         return citations
     }
 
     private async generateLesson(id: string, rawText: string): Promise<Lesson> {
         const lessonResult = await withRetry(() => this.aiService.generateLesson(rawText))
-    
+
+        const lessonContent: LessonContent = lessonResult.lesson as LessonContent
+
+        const audioText = formatLessonForAudio(lessonContent)
+        const wordCount = audioText.split(/\s+/).length
+
+        console.log('Generating audio for lesson...')
+
+        let audioUrl: string | null = null
+        let audioDuration: number | null = null
+
+        try {
+            const audioBuffer = await withRetry(() => this.aiService.generateAudio(audioText))
+
+            const ingestion = await this.ingestionRepository.findById(id)
+            const filename = ingestion?.title || 'lesson'
+            audioUrl = await this.storageService.uploadAudio(audioBuffer, filename)
+
+            audioDuration = calculateAudioDuration(wordCount)
+
+            console.log('Audio generated and uploaded:', audioUrl)
+        } catch (error) {
+            console.error('Audio generation failed, continuing without audio:', error)
+            // Continue without audio 
+        }
+
         const lesson = await this.lessonService.createLesson({
             ingestionId: id,
             content: JSON.stringify(lessonResult.lesson),
             tone: lessonResult.lesson.tone || 'professional',
-            targetAudience: lessonResult.lesson.targetAudience || 'employee upskilling'
+            targetAudience: lessonResult.lesson.targetAudience || 'employee upskilling',
+            wordCount,
+            audioUrl,
+            audioDuration,
+            audioGeneratedAt: audioUrl ? new Date() : null
         })
-    
+
         return lesson
     }
 

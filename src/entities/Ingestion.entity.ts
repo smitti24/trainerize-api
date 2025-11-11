@@ -15,7 +15,7 @@ export class Ingestion {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column({ type: 'varchar', unique: true, name: 'ingestion_id' })
+    @Column({ type: 'varchar', length: 100, unique: true, name: 'ingestion_id' })
     ingestionId: string
 
     @Column({ type: 'varchar', length: 500 })

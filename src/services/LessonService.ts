@@ -21,8 +21,12 @@ export class LessonService {
         content: string
         tone?: string
         targetAudience?: string
+        wordCount?: number
+        audioUrl?: string | null
+        audioDuration?: number | null
+        audioGeneratedAt?: Date | null
     }): Promise<Lesson> {
-        const wordCount: number = this.countWords(data.content)
+        const wordCount: number = data.wordCount || this.countWords(data.content)
 
         const lessonData: Partial<Lesson> = {
             ingestionId: data.ingestionId,
@@ -30,6 +34,9 @@ export class LessonService {
             wordCount,
             tone: data.tone || 'professional',
             targetAudience: data.targetAudience || 'employee upskilling',
+            audioUrl: data.audioUrl || null,
+            audioDuration: data.audioDuration || null,
+            audioGeneratedAt: data.audioGeneratedAt || null,
         }
 
         return await this.lessonRepository.create(lessonData)

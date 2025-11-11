@@ -1,16 +1,20 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai'
+import { GoogleGenAI } from '@google/genai'
 import { env } from '../config/environment'
 import { Theme } from '../entities/Theme.entity'
 import { AI_PROMPTS, fillPromptTemplate } from '../config/prompts/prompts'
 import { Lesson } from '../entities/Lesson.entity'
 import { SourceCitation } from '../entities/SourceCitation.entity'
+import { convertPcmToWav } from '../utils/audioConverter'
 
 export class AiService {
     private genAI: GoogleGenerativeAI
+    private audioAI: GoogleGenAI
     private model: GenerativeModel
 
     constructor() {
         this.genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY)
+        this.audioAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY })
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     }
 
@@ -149,6 +153,37 @@ export class AiService {
         } catch (error) {
             console.error('Citation extraction error:', error)
             throw new Error('Failed to extract citations from content')
+        }
+    }
+
+    async generateAudio(text: string): Promise<Buffer> {
+        try {
+            const response = await this.audioAI.models.generateContent({
+                model: 'gemini-2.5-flash-preview-tts',
+                contents: [{ parts: [{ text }] }],
+                config: {
+                    responseModalities: ['AUDIO'],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: 'Kore' }
+                        }
+                    }
+                }
+            })
+
+            const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
+
+            if (!data) {
+                throw new Error('No audio data returned from Gemini API')
+            }
+
+            const pcmBuffer = Buffer.from(data, 'base64')
+            const wavBuffer = await convertPcmToWav(pcmBuffer, 1, 24000, 16)
+
+            return wavBuffer
+        } catch (error) {
+            console.error('Audio generation error:', error)
+            throw new Error(`Failed to generate audio: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
     }
 }
