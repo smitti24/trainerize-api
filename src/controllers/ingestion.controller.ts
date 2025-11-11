@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { IngestionService } from '../services/IngestionService'
 import { IngestionRepository } from '../repositories/IngestionRepository'
-import { createIngestionSchema, completeProcessingSchema, ingestionSchema, ingestionIdSchema, createAndProcessIngestionSchema } from '../schemas/ingestion.schema'
+import { createIngestionSchema, completeProcessingSchema, ingestionIdSchema, createAndProcessIngestionSchema } from '../schemas/ingestion.schema'
 import { Ingestion } from '../entities/Ingestion.entity'
 
 export class IngestionController {
@@ -30,7 +30,7 @@ export class IngestionController {
 
     public async getIngestionById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = ingestionSchema.parse(req.params).id
+            const id = ingestionIdSchema.parse(req.params.id)
             const ingestion = await this.ingestionService.getIngestionById(id)
 
             if (!ingestion) {
@@ -74,7 +74,7 @@ export class IngestionController {
         try {
             const id = ingestionIdSchema.parse(req.params)
             const validatedData = completeProcessingSchema.parse(req.body)
-            
+
             const ingestion = await this.ingestionService.completeProcessing(
                 id,
                 validatedData.rawText,
@@ -127,7 +127,7 @@ export class IngestionController {
     public async processIngestion(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const validatedData = createAndProcessIngestionSchema.parse(req.body)
-            
+
             const result = await this.ingestionService.createAndProcessIngestion({
                 title: validatedData.title,
                 sourceType: validatedData.sourceType,
@@ -136,7 +136,7 @@ export class IngestionController {
                 originalFilename: validatedData.originalFilename,
                 rawText: validatedData.rawText
             })
-    
+
             res.status(201).json({
                 success: true,
                 message: 'Ingestion created and processed successfully',
@@ -147,5 +147,5 @@ export class IngestionController {
         }
     }
 
-    
+
 }

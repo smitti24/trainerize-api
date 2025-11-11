@@ -13,7 +13,7 @@ export const completeProcessingSchema = z.object({
     wordCount: z.number().positive(),
 })
 
-const _uuidSchema = z.string().uuid()
+const _uuidSchema = z.uuid()
 
 export const ingestionIdSchema = _uuidSchema
 
