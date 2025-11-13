@@ -3,6 +3,7 @@ import { IngestionService } from '../services/IngestionService'
 import { IngestionRepository } from '../repositories/IngestionRepository'
 import { createIngestionSchema, completeProcessingSchema, ingestionIdSchema, createAndProcessIngestionSchema } from '../schemas/ingestion.schema'
 import { Ingestion } from '../entities/Ingestion.entity'
+import { TextExtractor } from '../utils/textExtractor'
 
 export class IngestionController {
     private ingestionService: IngestionService
@@ -147,5 +148,44 @@ export class IngestionController {
         }
     }
 
+    public async uploadAndProcess(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            if (!req.file) {
+                res.status(400).json({ error: 'No file uploaded' })
+                return
+            }
+
+            const file = req.file
+            const fileType = file.mimetype === 'application/pdf' ? 'pdf' : 'docx'
+
+            const { text, wordCount } = await TextExtractor.extractTextWithMetadata(
+                file.buffer,
+                fileType
+            )
+
+            if (!text || text.length === 0) {
+                res.status(400).json({ error: 'Could not extract text from file' })
+                return
+            }
+
+            const result = await this.ingestionService.createAndProcessIngestion({
+                title: file.originalname.replace(/\.[^/.]+$/, ''),
+                sourceType: fileType,
+                fileSize: file.size,
+                filePath: null,
+                originalFilename: file.originalname,
+                rawText: text
+            })
+
+            res.status(201).json({
+                success: true,
+                message: 'File uploaded and processed successfully',
+                extractedWordCount: wordCount,
+                data: result
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
 }
